@@ -3,3 +3,4 @@ cif2ice.egg\*
 dist/*
 build/*
 *.pyc
+pycifrw/*
