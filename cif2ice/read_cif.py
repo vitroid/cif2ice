@@ -50,10 +50,6 @@ from math import *
 #sys.path.insert(0, 'pycifrw-4.1.1-min')
 from CifFile import CifFile, CifBlock
 
-logging.basicConfig(level=logging.DEBUG,
-                    #filename='log.txt',
-                    format="%(levelname)s| %(message)s")
-logger = logging.getLogger()
 
 # =============================================================================
 # =============================================================================
@@ -72,7 +68,7 @@ def float_with_error(x):
 
 # Tell the user how to use this script, and exits the script.
 def print_usage():
-
+    logger = logging.getLogger()
     logger.info('*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *')
     logger.info('This script reads a Crystallographic Information File (CIF) that describes a crystal,')
     logger.info('and creates a configuration file that can be used to start a Gromacs or LAMMPS simulation.')
@@ -118,6 +114,7 @@ def print_error(msg):
 
 # Converts an "_atom_type_label" into an element name.
 def extract_element(label):
+    logger = logging.getLogger()
 
     elem2 = ['He','Li','Be','Ne','Na','Mg','Al','Si','Cl','Ar','Ca','Sc','Ti',
              'Cr','Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr',
@@ -412,6 +409,7 @@ def write_cif(fNameIn, atoms, fNameOut):
 # Read CIF file, and extract the necessary info in the form of a dictionary.
 # E.g., the value of "_cell_volume" can be found with data['_cell_volume'].
 def read_cif(fNameIn):
+    logger = logging.getLogger()
 
     data = {}
 
@@ -604,7 +602,8 @@ def parse_commandline(filetypes=['.xyz', '.lammpstrj', '.gro', '.cif']):
 
     return fNameIn, fNameOut, (Nx,Ny,Nz), make_rect_box
 
-def read_and_process(fNameIn, fNameOut, Nbox, make_rect_box=False):
+def read_and_process(fNameIn, Nbox, make_rect_box=False):
+    logger = logging.getLogger()
     Nx,Ny,Nz = Nbox
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Read input file.
