@@ -84,7 +84,11 @@ def getoptions():
 
 def main():
     #prepare user's workarea
-    homegenice = os.path.expanduser("~/.genice")
+    home = os.path.expanduser("~")
+    if os.path.exists(home+"/Library/Application Support"): #MacOS
+        homegenice = home+"/Library/Application Support/GenIce"
+    else:
+        homegenice = os.path.expanduser(home + "/.genice") #Other unix
     sys.path.append(homegenice)
     try:
         os.makedirs(homegenice+"/lattices")
@@ -113,14 +117,18 @@ def main():
             fNameOut = fNameOut[:-4]
         fNameOut += ".py"
     else:
+        if validators.url(name):
+            URL = name
+            name = os.path.basename(name)
+            if name[-4:] in (".cif", ".CIF"):
+                name = name[:-4]
+        else:
+            URL = "http://asia.iza-structure.org/IZA-SC/cif/"+name+".cif"
         fNameIn = homegenice + "/lattices/" + name + ".cif"
         fNameOut = homegenice + "/lattices/" + name + ".py"
-        if os.path.exists(fNameIn) and not options.force:
-            logger.error("File exists: {0}. Use '--force' option to overwrite.".format(fNameIn))
-            sys.exit(1)
-        name = "http://asia.iza-structure.org/IZA-SC/cif/"+name+".cif"
-        if validators.url(name):
-            download(name, fNameIn)
+        assert not os.path.exists(fNameIn) or options.force, "File exists: {0}. Use '--force' option to overwrite.".format(fNameIn)
+        assert validators.url(URL)
+        download(URL, fNameIn)
 
     logger.info("Input: {0}".format(fNameIn))
     logger.info("Output: {0}".format(fNameOut))
