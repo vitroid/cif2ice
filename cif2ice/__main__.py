@@ -11,7 +11,7 @@ import numpy as np
 from requests import get #requests package
 import validators        #validators package
 #private modules
-import read_cif
+from cif2ice import read_cif
 
 def shortest_distance(atoms):
     dmin = 1e99
