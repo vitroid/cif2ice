@@ -23,9 +23,17 @@ def shortest_distance(atoms):
             dmin = d
     return dmin**0.5
 
+def is_unique(L, pos):
+    for x in L:
+        d = x-pos
+        d -= np.floor(d + 0.5)
+        if np.dot(d,d) < 0.0000001:
+            return False
+    return True
 
 # python format for GenIce.
 def write_py(atoms, box, f, matchfunc=None):
+    logger = logging.getLogger()
     filtered = []
     if matchfunc is not None:
         for a in atoms:
@@ -48,12 +56,18 @@ def write_py(atoms, box, f, matchfunc=None):
         s += 'cell = """\n{0} {1} {2}\n"""\n'.format(box[0]*scale,
                                                      box[1]*scale,
                                                      box[2]*scale)
+        cell = np.diag(box)
         volume = np.product(box)
+    icell = np.linalg.inv(cell)
     s += 'waters = """\n'
+    uniques = []
     for name,x,y,z in filtered:
-        s += "{0} {1} {2}\n".format(x*scale,y*scale,z*scale)
+        rpos = np.dot([x,y,z], icell)
+        if is_unique(uniques, rpos):
+            uniques.append(rpos)
+            s += "{0} {1} {2}\n".format(*rpos)
     s += '"""\n'
-    s += 'coord = "absolute"\n'
+    s += 'coord = "relative"\n'
     s += 'bondlen = 3\n'
     density = len(filtered)*18.0/(volume*scale**3*1e-24*6.022e23)
     s += 'density = {0}\n'.format(density)
