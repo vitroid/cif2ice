@@ -729,6 +729,8 @@ def read_and_process(fNameIn, Nbox, make_rect_box=False):
 
             # Python is awesome: calling e.g. eval('x,y,1./2+z') will convert the
             # string into a 3-tuple using the current values for x,y,z!
+            logger.debug("OP: {0}".format(op))
+            op = op.lower()
             xn,yn,zn = eval(op)
 
             # Make sure that the new atom lies within the unit cell.

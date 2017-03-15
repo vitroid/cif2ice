@@ -78,7 +78,7 @@ def getoptions():
     parser.add_argument('--force', '-f', action='store_true', dest='force',
                         help='Force overwrite.')
     parser.add_argument('name', nargs=1,
-                       help='CIF file, Zeolite name, or URL')
+                       help='CIF file, Zeolite 3-letter code, or URL')
     return parser.parse_args()
 
 
@@ -123,7 +123,7 @@ def main():
             if name[-4:] in (".cif", ".CIF"):
                 name = name[:-4]
         else:
-            URL = "http://asia.iza-structure.org/IZA-SC/cif/"+name+".cif"
+            URL = "http://www.iza-structure.org/IZA-SC/cif/"+name+".cif"
         fNameIn = homegenice + "/lattices/" + name + ".cif"
         fNameOut = homegenice + "/lattices/" + name + ".py"
         assert not os.path.exists(fNameIn) or options.force, "File exists: {0}. Use '--force' option to overwrite.".format(fNameIn)
