@@ -63,6 +63,10 @@ def write_py(atoms, box, f, matchfunc=None):
     uniques = []
     for name,x,y,z in filtered:
         rpos = np.dot([x,y,z], icell)
+        rpos -= np.floor(rpos)
+        #Do twice to reduce the floating point uncertainty.
+        #(Hint: assume the case when x=-1e-33.)
+        rpos -= np.floor(rpos)
         if is_unique(uniques, rpos):
             uniques.append(rpos)
             s += "{0} {1} {2}\n".format(*rpos)
