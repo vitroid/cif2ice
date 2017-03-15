@@ -420,9 +420,25 @@ def read_cif(fNameIn):
     try:
         f = open(fNameIn, 'r')
         lines = []
+        oko_fix = False
         for line in f:
             stripped = line.strip()
-            if (len(stripped) > 0):  lines.append(stripped)
+            if (len(stripped) > 0):
+                #fix for OKO
+                import shlex
+                if stripped[0] == '_':
+                    cols = shlex.split(stripped) #shlex protects the quotation
+                    if len(cols) > 2:
+                        stripped = "{0} '{1}'".format(cols[0]," ".join(cols[1:]))
+                        logger.debug("Line (Fixed): {0}".format(stripped))
+                        oko_fix = True
+                lines.append(stripped)
+        if oko_fix:
+            fixedfilename = fNameIn + ".fix"
+            fixedfile = open(fixedfilename,"w")
+            fixedfile.write("\n".join(lines)+"\n")
+            fixedfile.close()
+            fNameIn = fixedfilename
     except:
         logger.error("Failed to open CIF file '{0}'".format(fNameIn))
         sys.exit()
