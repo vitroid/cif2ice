@@ -38,7 +38,7 @@
 #read_cif is written in Python3 style, while pycifrw is still in python2 style, so we assume read_cif is also executed by python2.
 #Matsumoto add the __future__ feature extension here.
 # =============================================================================
-from __future__ import print_function
+from __future__ import print_function, division
 
 import sys
 
@@ -58,6 +58,8 @@ def float_with_error(x):
     """
     some value in cif accompanies error like "1.234(5)
     """
+    if "?" in x:
+        return 0
     pos = x.find("(")
     if pos >= 0:
         x = x[:pos]
