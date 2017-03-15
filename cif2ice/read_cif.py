@@ -425,6 +425,7 @@ def read_cif(fNameIn):
             stripped = line.strip()
             if (len(stripped) > 0):
                 #fix for OKO
+                #http://stackoverflow.com/questions/79968/split-a-string-by-spaces-preserving-quoted-substrings-in-python
                 import shlex
                 if stripped[0] == '_':
                     cols = shlex.split(stripped) #shlex protects the quotation
