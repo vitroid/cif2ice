@@ -8,7 +8,6 @@ The source can be
 3. The three-letter code of Zeolites.
 
 ## Installation
-Use pip of Python2. (Cif2ice uses pycifrw that is provided only for Python2)
 
     pip install cif2ice
 
