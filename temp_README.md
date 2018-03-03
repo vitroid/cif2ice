@@ -1,4 +1,4 @@
-#cif2ice
+# cif2ice
 A small utility to prepare a new ice structure from a CIF file.
 
 The source can be
@@ -7,16 +7,16 @@ The source can be
 2. An URL to a `.cif` file.
 3. The three-letter code of Zeolites.
 
-##Installation
+## Installation
 Use pip of Python2. (Cif2ice uses pycifrw that is provided only for Python2)
 
     pip install cif2ice
 
-##Usage
+## Usage
 
 %%usage%%
 
-##Example
+## Example
 In any case, the generated python module will be stored in  the private folder for [GenIce](https://github.com/vitroid/GenIce) (.genice/lattices or Library/Application Support/GenIce):
 
 1. To obtain a Zeolite RHO structure from the Zeolite DB
