@@ -107,7 +107,7 @@ def print_usage():
 
 # Shows an error message and the usage.
 def print_error(msg):
-
+    logger = logging.getLogger()
     logger.error('{0}'.format(msg))
     print_usage()
 
