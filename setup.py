@@ -22,7 +22,7 @@ setup(name='cif2ice',
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.5",
         ],
       author='Masakazu Matsumoto',
       author_email='vitroid@gmail.com',
@@ -30,7 +30,7 @@ setup(name='cif2ice',
       keywords=['cif2ice',],
       license='MIT',
       packages=['cif2ice'],
-      install_requires=['requests', 'validators', 'pycifrw', 'numpy' ],
+      install_requires=['requests', 'validators', 'pycifrw', 'numpy', 'genice>=1.0' ],
       entry_points = {
               'console_scripts': [
                   'cif2ice = cif2ice.__main__:main'

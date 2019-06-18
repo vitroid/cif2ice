@@ -1,8 +1,8 @@
 #Obtain BCT structure of Zeolite and make BCT.py module for GenIce.
 sample:
-	cif2ice BCT
+	./cif2ice.x BCT
 %: temp_%
-	cif2ice -h | python Utilities/replace.py %%usage%% "    " $< > $@
+	./cif2ice.x -h | python Utilities/replace.py %%usage%% "    " $< > $@
 # %.rst: %.md
 #	md2rst $<
 install:

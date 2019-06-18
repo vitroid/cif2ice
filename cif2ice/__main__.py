@@ -1,82 +1,108 @@
 #!/usr/bin/env python2
 
-#system modules
+# system modules
 import os
 import sys
 import itertools as it
 import argparse as ap
 import logging
-#external modules
+# external modules
 import numpy as np
-from requests import get #requests package
-import validators        #validators package
-#private modules
+from math import pi
+from requests import get  # requests package
+import validators  # validators package
+# private modules
 from cif2ice import read_cif
+from genice.cell import cellvectors
+
 
 def shortest_distance(atoms):
     dmin = 1e99
-    for a1,a2 in it.combinations(atoms,2):
-        name1,x1,y1,z1 = a1
-        name2,x2,y2,z2 = a2
-        d = (x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2
+    for a1, a2 in it.combinations(atoms, 2):
+        d = np.linalg.norm(a1 - a2)
         if d < dmin:
             dmin = d
-    return dmin**0.5
+    return dmin
+
 
 def is_unique(L, pos):
     for x in L:
-        d = x-pos
+        d = x - pos
         d -= np.floor(d + 0.5)
-        if np.dot(d,d) < 0.0000001:
+        if np.dot(d, d) < 0.0000001:
             return False
     return True
 
 # python format for GenIce.
-def write_py(atoms, box, f, matchfunc=None):
+
+
+def write_py(ratoms, box, Nbox, f, matchfunc):
     logger = logging.getLogger()
+
+    args = []
+    La, Lb, Lc, alpha, beta, gamma = box
+    cell0 = cellvectors(a=La, b=Lb, c=Lc, A=alpha, B=beta, C=gamma)
+
     filtered = []
-    if matchfunc is not None:
-        for a in atoms:
-            if matchfunc(a[0]):
-                filtered.append(a)
-    else:
-        filtered = atoms
-    dmin = shortest_distance(filtered)
+
+    for a in ratoms:
+        if matchfunc(a[0]):
+            rpos = np.array(a[1:])
+            rpos -= np.floor(rpos)
+            rpos -= np.floor(rpos)
+            filtered.append(rpos)
+
+    filtered = np.array(filtered)
+    dmin = shortest_distance(filtered @ cell0)
     scale = 2.76 / dmin
 
+    La *= scale * Nbox[0]
+    Lb *= scale * Nbox[1]
+    Lc *= scale * Nbox[2]
+
+    args.append("a={0}".format(La))
+    args.append("b={0}".format(Lb))
+    args.append("c={0}".format(Lc))
+
+    if alpha != 90.0:
+        args.append("A={0}".format(alpha))
+
+    if beta != 90.0:
+        args.append("B={0}".format(beta))
+
+    if gamma != 90.0:
+        args.append("C={0}".format(gamma))
+
     s = ""
-    if (len(box) == 6):
-        npbox = [v*scale for v in box]
-        s += 'celltype = "triclinic"\n'
-        s += 'cell = """\n{0} 0 0\n{1} {2} 0\n{3} {4} {5}\n"""\n'.format(*npbox)
-        cell = np.array([[box[0],0,0],[box[1],box[2],0],[box[3],box[4],box[5]]])
-        volume = np.linalg.det(cell)
-    else:
-        s += 'celltype = "rect"\n'
-        s += 'cell = """\n{0} {1} {2}\n"""\n'.format(box[0]*scale,
-                                                     box[1]*scale,
-                                                     box[2]*scale)
-        cell = np.diag(box)
-        volume = np.product(box)
+    npbox = [v * scale for v in box]
+    s += "from genice.cell import cellvectors\n"
+    H = "cell = cellvectors("
+    s += H + (",\n" + " " * len(H)).join(args) + ")\n\n"
+
+    cell = cell0 * scale
+    volume = np.linalg.det(cell)
     icell = np.linalg.inv(cell)
+    repl = np.zeros([filtered.shape[0] * Nbox[0] * Nbox[1] * Nbox[2], 3])
+    N = 0
+    Nbox = np.array(Nbox)
+    for x in range(Nbox[0]):
+        for y in range(Nbox[1]):
+            for z in range(Nbox[2]):
+                repl[N:N + filtered.shape[0]] = filtered + np.array([x, y, z])
+                N += filtered.shape[0]
+    repl /= Nbox
+
     s += 'waters = [\n'
-    uniques = []
-    for name,x,y,z in filtered:
-        rpos = np.dot([x,y,z], icell)
-        rpos -= np.floor(rpos)
-        #Do twice to reduce the floating point uncertainty.
-        #(Hint: assume the case when x=-1e-33.)
-        rpos -= np.floor(rpos)
-        if is_unique(uniques, rpos):
-            uniques.append(rpos)
-            s += "[{0}, {1}, {2}],  #{3}\n".format(*rpos, name)
+    for rpos in repl:
+        s += "[{0}, {1}, {2}],\n".format(*rpos)
     s += ']\n'
     s += 'coord = "relative"\n'
     s += 'bondlen = 3\n'
-    density = len(filtered)*18.0/(volume*scale**3*1e-24*6.022e23)
+    density = len(filtered) * 18.0 / (volume * 1e-24 * 6.022e23)
     s += 'density = {0}\n'.format(density)
     f.write(s)
-    
+
+
 def download(url, file_name):
     # open in binary mode
     with open(file_name, "wb") as file:
@@ -84,10 +110,11 @@ def download(url, file_name):
         response = get(url)
         # write to file
         file.write(response.content)
-        
+
+
 def getoptions():
     parser = ap.ArgumentParser(description='')
-    parser.add_argument('--rep',  '-r', nargs = 3, type=int,   dest='rep',  default=[1,1,1],
+    parser.add_argument('--rep', '-r', nargs=3, type=int, dest='rep', default=[1, 1, 1],
                         help='Repeat the unit cell in x,y, and z directions. [1,1,1]')
     parser.add_argument('--debug', '-D', action='store_true', dest='debug',
                         help='Output debugging info.')
@@ -96,23 +123,11 @@ def getoptions():
     parser.add_argument('--force', '-f', action='store_true', dest='force',
                         help='Force overwrite.')
     parser.add_argument('name', nargs=1,
-                       help='CIF file, Zeolite 3-letter code, or URL')
+                        help='CIF file, Zeolite 3-letter code, or URL')
     return parser.parse_args()
 
 
 def main():
-    #prepare user's workarea
-    home = os.path.expanduser("~")
-    if os.path.exists(home+"/Library/Application Support"): #MacOS
-        homegenice = home+"/Library/Application Support/GenIce"
-    else:
-        homegenice = os.path.expanduser(home + "/.genice") #Other unix
-    sys.path.append(homegenice)
-    try:
-        os.makedirs(homegenice+"/lattices")
-#        os.makedirs(homegenice+"/molecules")
-    except:
-        pass #just ignore.
     options = getoptions()
     if options.debug:
         logging.basicConfig(level=logging.DEBUG,
@@ -121,16 +136,16 @@ def main():
         logging.basicConfig(level=logging.WARN,
                             format="%(asctime)s %(levelname)s %(message)s")
     else:
-        #normal
+        # normal
         logging.basicConfig(level=logging.INFO,
                             format="%(asctime)s %(levelname)s %(message)s")
     logger = logging.getLogger()
     Nbox = [int(x) for x in options.rep]
     name = options.name[0]
-    #input must be a file......too bad.
+    # input must be a file......too bad.
     if os.path.exists(name):
         fNameIn = name
-        fNameOut = homegenice + "/lattices/" + os.path.basename(name)
+        fNameOut = os.path.basename(name)
         if fNameOut[-4:] in (".cif", ".CIF"):
             fNameOut = fNameOut[:-4]
         fNameOut += ".py"
@@ -141,9 +156,9 @@ def main():
             if name[-4:] in (".cif", ".CIF"):
                 name = name[:-4]
         else:
-            URL = "http://www.iza-structure.org/IZA-SC/cif/"+name+".cif"
-        fNameIn = homegenice + "/lattices/" + name + ".cif"
-        fNameOut = homegenice + "/lattices/" + name + ".py"
+            URL = "http://www.iza-structure.org/IZA-SC/cif/" + name + ".cif"
+        fNameIn = name + ".cif"
+        fNameOut = name + ".py"
         assert not os.path.exists(fNameIn) or options.force, "File exists: {0}. Use '--force' option to overwrite.".format(fNameIn)
         assert validators.url(URL)
         download(URL, fNameIn)
@@ -153,11 +168,10 @@ def main():
     if os.path.exists(fNameOut) and not options.force:
         logger.error("File exists: {0}. Use '--force' option to overwrite.".format(fNameOut))
         sys.exit(1)
-    atoms, box = read_cif.read_and_process(fNameIn, Nbox, make_rect_box=False)
+    atoms, box = read_cif.read_and_process(fNameIn, make_rect_box=False)
     fOut = open(fNameOut, "w")
-    write_py(atoms, box, fOut, matchfunc=lambda x: x[0] != "O")
+    write_py(atoms, box, Nbox, fOut, matchfunc=lambda x: x[0] != "O")
 
 
-        
 if __name__ == "__main__":
     main()
