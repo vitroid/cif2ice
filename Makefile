@@ -1,3 +1,5 @@
+PKGNAME=cif2ice
+
 #Obtain BCT structure of Zeolite and make BCT.py module for GenIce.
 sample:
 	./cif2ice.x BCT
@@ -10,14 +12,14 @@ sample:
 test-deploy: build
 	twine upload -r pypitest dist/*
 test-install:
-	pip install --index-url https://test.pypi.org/simple/ genice
+	pip install --index-url https://test.pypi.org/simple/ $(PKGNAME)
 
 
 install:
 	./setup.py install
 uninstall:
 	pip uninstall cif2ice
-build: README.md $(wildcard genice/*.py genice/formats/*.py genice/lattices/*.py genice/molecules/*.py)
+build: README.md $(wildcard cif2ice/*.py)
 	./setup.py sdist bdist_wheel
 
 
@@ -26,8 +28,10 @@ deploy: build
 check:
 	./setup.py check
 
+clean:
+	-rm -rf build dist
 distclean:
 	-rm *.scad *.yap @*
 	-rm -rf build dist
-	-rm -rf GenIce.egg-info
+	-rm -rf *.egg-info
 	-rm README.rst

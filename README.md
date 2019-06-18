@@ -1,5 +1,5 @@
 # cif2ice
-A small utility to prepare a new ice structure from a CIF file.
+A small utility to prepare a new ice structure for [GenIce](https://github.com/vitroid/GenIce) from a CIF file.
 
 The source can be
 
@@ -13,7 +13,7 @@ The source can be
 
 ## Usage
 
-    usage: cif2ice [-h] [--rep REP REP REP] [--debug] [--quiet] [--force] name
+    usage: cif2ice.x [-h] [--rep REP REP REP] [--debug] [--quiet] [--force] name
     
     positional arguments:
       name                  CIF file, Zeolite 3-letter code, or URL
@@ -28,7 +28,6 @@ The source can be
 
 
 ## Example
-In any case, the generated python module will be stored in  the private folder for [GenIce](https://github.com/vitroid/GenIce) (.genice/lattices or Library/Application Support/GenIce):
 
 1. To obtain a Zeolite RHO structure from the Zeolite DB
 
@@ -42,7 +41,7 @@ In any case, the generated python module will be stored in  the private folder f
 
         cif2ice http://somewhere/MTN.cif
 
-The structure is accessible from GenIce:
+To use the module with GenIce, make a folder named `lattices/` in the current working directory and put `MTN.py` there.
 
     genice MTN > MTN.gro
 
