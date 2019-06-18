@@ -8,7 +8,7 @@ sample:
 install:
 	./setup.py install
 uninstall:
-	pip2 uninstall cif2ice
+	pip uninstall cif2ice
 pypi:
 #	make README.rst
 	./setup.py check

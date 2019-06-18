@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 from setuptools import setup
 import os
@@ -30,7 +30,7 @@ setup(name='cif2ice',
       keywords=['cif2ice',],
       license='MIT',
       packages=['cif2ice'],
-      install_requires=['requests', 'validators', 'pycifrw', 'numpy', 'genice>=1.0' ],
+      install_requires=['requests', 'validators', 'pycifrw', 'numpy', 'GenIce>=1.0rc4' ],
       entry_points = {
               'console_scripts': [
                   'cif2ice = cif2ice.__main__:main'
