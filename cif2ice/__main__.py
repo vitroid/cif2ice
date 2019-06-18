@@ -59,7 +59,7 @@ def write_py(atoms, box, f, matchfunc=None):
         cell = np.diag(box)
         volume = np.product(box)
     icell = np.linalg.inv(cell)
-    s += 'waters = """\n'
+    s += 'waters = [\n'
     uniques = []
     for name,x,y,z in filtered:
         rpos = np.dot([x,y,z], icell)
@@ -69,8 +69,8 @@ def write_py(atoms, box, f, matchfunc=None):
         rpos -= np.floor(rpos)
         if is_unique(uniques, rpos):
             uniques.append(rpos)
-            s += "{0} {1} {2}\n".format(*rpos)
-    s += '"""\n'
+            s += "[{0}, {1}, {2}],  #{3}\n".format(*rpos, name)
+    s += ']\n'
     s += 'coord = "relative"\n'
     s += 'bondlen = 3\n'
     density = len(filtered)*18.0/(volume*scale**3*1e-24*6.022e23)
