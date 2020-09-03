@@ -1,4 +1,4 @@
-cif2ice.egg\*
+*.egg-info/
 *.cif
 dist/*
 build/*

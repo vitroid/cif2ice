@@ -30,11 +30,10 @@ setup(name='cif2ice',
       keywords=['cif2ice',],
       license='MIT',
       packages=['cif2ice'],
-      install_requires=['requests', 'validators', 'pycifrw', 'numpy', 'GenIce>=1.0rc4' ],
+      install_requires=['requests', 'validators', 'pycifrw', 'numpy', 'GenIce2' ],
       entry_points = {
               'console_scripts': [
                   'cif2ice = cif2ice.__main__:main'
               ]
           }
       )
-

@@ -50,7 +50,7 @@ import numpy as np
 # Import python files from the "pycifrw-4.1.1-min" directory.
 #sys.path.insert(0, 'pycifrw-4.1.1-min')
 from CifFile import CifFile, CifBlock
-from genice.cell import cellvectors
+from genice2.cell import cellvectors
 
 # =============================================================================
 # =============================================================================

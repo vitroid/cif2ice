@@ -13,7 +13,7 @@ from requests import get  # requests package
 import validators  # validators package
 # private modules
 from cif2ice import read_cif
-from genice.cell import cellvectors
+from genice2.cell import cellvectors
 
 
 def shortest_distance(atoms):
